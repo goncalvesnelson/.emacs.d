@@ -33,13 +33,18 @@
 (eval-when-compile
   (require 'init-custom))
 
+(use-package google-c-style)
+(use-package clang-format)
+
 ;; C/C++ Mode
 (use-package cc-mode
   :ensure nil
   :bind (:map c-mode-base-map
          ("C-c c" . compile))
-  :hook (c-mode-common . (lambda () (c-set-style "bsd")))
-  :init (setq-default c-basic-offset 4)
+  :hook (c-mode-common . (lambda ()
+                           (c-add-style "google" google-c-style)
+                           (c-set-style "google")))
+  :init (setq-default c-basic-offset 2)
   :config
   (use-package modern-cpp-font-lock
     :diminish
