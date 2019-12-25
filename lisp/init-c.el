@@ -35,6 +35,10 @@
 
 (use-package google-c-style)
 (use-package clang-format)
+(add-hook 'c-mode-common-hook
+          (function (lambda ()
+                    (add-hook 'before-save-hook
+                              'clang-format-buffer))))
 
 ;; C/C++ Mode
 (use-package cc-mode
