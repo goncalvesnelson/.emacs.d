@@ -35,12 +35,12 @@
 
 ;; Prettify Symbols
 ;; e.g. display “lambda” as “λ”
-(use-package prog-mode
-  :ensure nil
-  :hook (prog-mode . prettify-symbols-mode)
-  :init
-  (setq-default prettify-symbols-alist centaur-prettify-symbols-alist)
-  (setq prettify-symbols-unprettify-at-point 'right-edge))
+;; (use-package prog-mode
+;;   :ensure nil
+;;   :hook (prog-mode . prettify-symbols-mode)
+;;   :init
+;;   (setq-default prettify-symbols-alist centaur-prettify-symbols-alist)
+;;   (setq prettify-symbols-unprettify-at-point 'right-edge))
 
 ;; Jump to definition
 (use-package dumb-jump
