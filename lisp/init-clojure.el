@@ -11,6 +11,7 @@
   (require 'init-custom))
 
 (use-package clojure-mode-extra-font-locking)
+(use-package flycheck-clj-kondo)
 (use-package paredit)
 
 (use-package clojure-mode
@@ -26,6 +27,9 @@
 
   ;; more syntax highlighting
   (require 'clojure-mode-extra-font-locking)
+
+  ;; Use clj-kondo lint
+  (require 'flycheck-clj-kondo)
 
   (add-hook 'clojure-mode-hook 'turn-on-eldoc-mode)
   (add-hook 'clojure-mode-hook
