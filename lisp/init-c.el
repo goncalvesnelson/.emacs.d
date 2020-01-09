@@ -45,7 +45,8 @@
          ("C-c c" . compile))
   :hook (c-mode-common . (lambda ()
                            (c-add-style "google" google-c-style)
-                           (c-set-style "google")))
+                           (c-set-style "google")
+                           (local-set-key  (kbd "C-c o") 'ff-find-other-file)))
   :init (setq-default c-basic-offset 2)
   :config
   (use-package modern-cpp-font-lock
