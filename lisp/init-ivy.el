@@ -51,8 +51,8 @@
          ([remap dired] . counsel-dired)
          ([remap set-variable] . counsel-set-variable)
          ([remap insert-char] . counsel-unicode-char)
+         ([remap recentf-open-files] . counsel-recentf)
 
-         ("C-x C-r" . counsel-buffer-or-recentf)
          ("C-x j"   . counsel-mark-ring)
          ("C-h F"   . counsel-faces)
 
@@ -60,12 +60,14 @@
          ("C-c L" . counsel-load-library)
          ("C-c O" . counsel-find-file-extern)
          ("C-c P" . counsel-package)
+         ("C-c R" . counsel-list-processes)
          ("C-c f" . counsel-find-library)
          ("C-c g" . counsel-grep)
          ("C-c h" . counsel-command-history)
          ("C-c i" . counsel-git)
          ("C-c j" . counsel-git-grep)
          ("C-c l" . counsel-locate)
+         ("C-c o" . counsel-outline)
          ("C-c r" . counsel-rg)
          ("C-c z" . counsel-fzf)
 
@@ -74,6 +76,7 @@
          ("C-c c L" . counsel-load-library)
          ("C-c c O" . counsel-find-file-extern)
          ("C-c c P" . counsel-package)
+         ("C-c c R" . counsel-list-processes)
          ("C-c c a" . counsel-apropos)
          ("C-c c e" . counsel-colors-emacs)
          ("C-c c f" . counsel-find-library)
@@ -137,7 +140,7 @@
       "Transform CANDS into a string for minibuffer."
       (ivy--format-function-generic
        (lambda (str)
-         (concat (if (display-graphic-p)
+         (concat (if (icons-displayable-p)
                      (all-the-icons-octicon "chevron-right" :height 0.8 :v-adjust -0.05)
                    ">")
                  (propertize " " 'display `(space :align-to 2))
@@ -503,7 +506,7 @@ This is for use in `ivy-re-builders-alist'."
 
 ;; More friendly display transformer for Ivy
 (use-package ivy-rich
-  :hook ((counsel-projectile-mode . ivy-rich-mode)
+  :hook ((counsel-projectile-mode . ivy-rich-mode) ; Must load after `counsel-projectile'
          (ivy-rich-mode . (lambda ()
                             (setq ivy-virtual-abbreviate
                                   (or (and ivy-rich-mode 'abbreviate) 'name)))))
@@ -522,7 +525,7 @@ This is for use in `ivy-re-builders-alist'."
 
     (defun ivy-rich-buffer-icon (candidate)
       "Display buffer icons in `ivy-rich'."
-      (when (display-graphic-p)
+      (when (icons-displayable-p)
         (let* ((buffer (get-buffer candidate))
                (buffer-file-name (buffer-file-name buffer))
                (major-mode (buffer-local-value 'major-mode buffer))
@@ -533,7 +536,7 @@ This is for use in `ivy-re-builders-alist'."
 
     (defun ivy-rich-file-icon (candidate)
       "Display file icons in `ivy-rich'."
-      (when (display-graphic-p)
+      (when (icons-displayable-p)
         (let* ((path (concat ivy--directory candidate))
                (file (file-name-nondirectory path))
                (icon (cond
@@ -549,77 +552,77 @@ This is for use in `ivy-re-builders-alist'."
 
     (defun ivy-rich-project-icon (_candidate)
       "Display project icons in `ivy-rich'."
-      (when (display-graphic-p)
+      (when (icons-displayable-p)
         (all-the-icons-octicon "file-directory" :height 1.0 :v-adjust 0.01)))
 
     (defun ivy-rich-mode-icon (_candidate)
       "Display mode icons in `ivy-rich'."
-      (when (display-graphic-p)
+      (when (icons-displayable-p)
         (all-the-icons-faicon "cube" :height 0.95 :v-adjust -0.05 :face 'all-the-icons-blue)))
 
     (defun ivy-rich-function-icon (_candidate)
       "Display function icons in `ivy-rich'."
-      (when (display-graphic-p)
+      (when (icons-displayable-p)
         (all-the-icons-faicon "cube" :height 0.95 :v-adjust -0.05 :face 'all-the-icons-purple)))
 
     (defun ivy-rich-variable-icon (_candidate)
       "Display the variable icon in `ivy-rich'."
-      (when (display-graphic-p)
+      (when (icons-displayable-p)
         (all-the-icons-octicon "tag" :height 0.95 :v-adjust 0 :face 'all-the-icons-lblue)))
 
     (defun ivy-rich-symbol-icon (_candidate)
       "Display the symbol icon in `ivy-rich'."
-      (when (display-graphic-p)
+      (when (icons-displayable-p)
         (all-the-icons-octicon "gear" :height 0.9 :v-adjust -0.05)))
 
     (defun ivy-rich-theme-icon (_candidate)
       "Display the theme icon in `ivy-rich'."
-      (when (display-graphic-p)
+      (when (icons-displayable-p)
         (all-the-icons-material "palette" :height 1.0 :v-adjust -0.2)))
 
     (defun ivy-rich-keybinding-icon (_candidate)
       "Display the keybindings icon in `ivy-rich'."
-      (when (display-graphic-p)
+      (when (icons-displayable-p)
         (all-the-icons-material "keyboard" :height 0.9 :v-adjust -0.15)))
 
     (defun ivy-rich-library-icon (_candidate)
       "Display the library icon in `ivy-rich'."
-      (when (display-graphic-p)
+      (when (icons-displayable-p)
         (all-the-icons-material "view_module" :height 1.0 :v-adjust -0.225 :face 'all-the-icons-lblue)))
 
     (defun ivy-rich-package-icon (_candidate)
       "Display the package icon in `ivy-rich'."
-      (when (display-graphic-p)
+      (when (icons-displayable-p)
         (all-the-icons-faicon "archive" :height 0.9 :v-adjust -0.05 :face 'all-the-icons-silver)))
 
     (defun ivy-rich-font-icon (_candidate)
       "Display the font icon in `ivy-rich'."
-      (when (display-graphic-p)
+      (when (icons-displayable-p)
         (all-the-icons-faicon "font" :height 0.85 :v-adjust -0.05 :face 'all-the-icons-lblue)))
 
     (defun ivy-rich-world-clock-icon (_candidate)
       "Display the world clock icon in `ivy-rich'."
-      (when (display-graphic-p)
+      (when (icons-displayable-p)
         (all-the-icons-faicon "globe" :height 0.9 :v-adjust -0.05 :face 'all-the-icons-lblue)))
 
     (defun ivy-rich-tramp-icon (_candidate)
       "Display the tramp icon in `ivy-rich'."
-      (when (display-graphic-p)
+      (when (icons-displayable-p)
         (all-the-icons-octicon "radio-tower" :height 0.9 :v-adjust 0.01)))
 
     (defun ivy-rich-git-branch-icon (_candidate)
       "Display the git branch icon in `ivy-rich'."
-      (when (display-graphic-p)
+      (when (icons-displayable-p)
         (all-the-icons-octicon "git-branch" :height 1.0 :v-adjust -0.05 :face 'all-the-icons-green)))
 
     (defun ivy-rich-process-icon (_candidate)
       "Display the process icon in `ivy-rich'."
-      (when (display-graphic-p)
+      (when (icons-displayable-p)
         (all-the-icons-faicon "bolt" :height 1.0 :v-adjust -0.05 :face 'all-the-icons-lblue)))
 
     (defun ivy-rich-imenu-icon (candidate)
       "Display the imenu icon in `ivy-rich'."
-      (when (display-graphic-p)
+      (when (icons-displayable-p)
         (let ((case-fold-search nil))
           (cond
            ((string-match-p "Type Parameters?[:)]" candidate)
@@ -646,7 +649,7 @@ This is for use in `ivy-re-builders-alist'."
             (all-the-icons-faicon "archive" :height 0.9 :v-adjust -0.05 :face 'all-the-icons-silver))
            (t (all-the-icons-material "find_in_page" :height 0.9 :v-adjust -0.125))))))
 
-    (when (display-graphic-p)
+    (when (icons-displayable-p)
       (defun my-ivy-rich-bookmark-type (candidate)
         (let ((filename (ivy-rich-bookmark-filename candidate)))
           (cond ((null filename)

@@ -101,6 +101,7 @@
 ;; Start server
 (use-package server
   :ensure nil
+  :if centaur-server
   :hook (after-init . server-mode))
 
 ;; History
@@ -110,6 +111,7 @@
 
 (use-package recentf
   :ensure nil
+  :bind (("C-x C-r" . recentf-open-files))
   :hook (after-init . recentf-mode)
   :init (setq recentf-max-saved-items 300
               recentf-exclude

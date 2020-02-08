@@ -71,12 +71,9 @@
       (use-package doom-themes
         :defines doom-themes-treemacs-theme
         :functions doom-themes-hide-modeline
+        :custom (doom-dark+-blue-modeline t)
         :init (centaur-load-theme centaur-theme)
         :config
-        ;; Make swiper match clearer
-	    (with-eval-after-load 'swiper
-	      (set-face-background 'swiper-background-match-face-1 "SlateGray1"))
-
         ;; Enable flashing mode-line on errors
         (doom-themes-visual-bell-config)
 
@@ -93,7 +90,6 @@
                (minibuffer-setup . solaire-mode-in-minibuffer)
                (after-load-theme . solaire-mode-swap-bg))
         :config
-        (setq solaire-mode-remap-fringe nil)
         (solaire-global-mode 1)
         (solaire-mode-swap-bg)
         (advice-add #'persp-load-state-from-file
@@ -105,6 +101,7 @@
 ;; Mode-line
 (use-package doom-modeline
   :custom
+  (doom-modeline-icon centaur-icon)
   (doom-modeline-minor-modes t)
   (doom-modeline-unicode-fallback t)
   (doom-modeline-mu4e nil)
@@ -155,6 +152,8 @@
       "mu4e" :toggle doom-modeline-mu4e)
      ("R" (setq doom-modeline-irc (not doom-modeline-irc))
       "irc" :toggle doom-modeline-irc)
+     ("F" (setq doom-modeline-irc-buffers (not doom-modeline-irc-buffers))
+      "irc buffers" :toggle doom-modeline-irc-buffers)
      ("S" (setq doom-modeline-checker-simple-format (not doom-modeline-checker-simple-format))
       "simple checker" :toggle doom-modeline-checker-simple-format)
      ("V" (setq doom-modeline-env-version (not doom-modeline-env-version))
@@ -190,6 +189,19 @@
      ("b" (setq doom-modeline-buffer-file-name-style 'buffer-name)
       "buffer name"
       :toggle (eq doom-modeline-buffer-file-name-style 'buffer-name)))
+    "Project Detection"
+    (("p f" (setq doom-modeline-project-detection 'ffip)
+      "ffip"
+      :toggle (eq doom-modeline-project-detection 'ffip))
+     ("p t" (setq doom-modeline-project-detection 'projectile)
+      "projectile"
+      :toggle (eq doom-modeline-project-detection 'projectile))
+     ("p p" (setq doom-modeline-project-detection 'project)
+      "project"
+      :toggle (eq doom-modeline-project-detection 'project))
+     ("p n" (setq doom-modeline-project-detection nil)
+      "disable"
+      :toggle (eq doom-modeline-project-detection nil)))
     "Misc"
     (("g" (progn
             (message "Fetching GitHub notifications...")
@@ -202,8 +214,16 @@
       "list errors" :exit t)
      ("B" (if (bound-and-true-p grip-mode)
               (grip-browse-preview)
-            (message "Not in preiew"))
-      "browse preivew" :exit t)))))
+            (message "Not in preview"))
+      "browse preview" :exit t)
+     ("z h" (counsel-read-setq-expression 'doom-modeline-height)
+      "set height" :exit t)
+     ("z w" (counsel-read-setq-expression 'doom-modeline-bar-width)
+      "set bar width" :exit t)
+     ("z g" (counsel-read-setq-expression 'doom-modeline-github-interval)
+      "set github interval" :exit t)
+     ("z n" (counsel-read-setq-expression 'doom-modeline-gnus-timer)
+      "set gnus interval" :exit t)))))
 
 (use-package hide-mode-line
   :hook (((completion-list-mode completion-in-region-mode) . hide-mode-line-mode)))

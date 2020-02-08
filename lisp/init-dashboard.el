@@ -81,8 +81,7 @@
            ("h" . dashboard-hydra/body)
            ("?" . dashboard-hydra/body))
     :hook (dashboard-mode . (lambda () (setq-local frame-title-format "")))
-    :init (dashboard-setup-startup-hook)
-    :config
+    :init
     (setq dashboard-banner-logo-title "CENTAUR EMACS - Enjoy Programming & Writing"
           dashboard-startup-banner (or centaur-logo 'official)
           dashboard-center-content t
@@ -92,8 +91,8 @@
                             (projects . 5))
 
           dashboard-set-init-info t
-          dashboard-set-file-icons t
-          dashboard-set-heading-icons t
+          dashboard-set-file-icons centaur-icon
+          dashboard-set-heading-icons centaur-icon
           dashboard-heading-icons '((recents   . "file-text")
                                     (bookmarks . "bookmark")
                                     (agenda    . "calendar")
@@ -102,7 +101,7 @@
 
           dashboard-set-footer t
           dashboard-footer (format "Powered by Vincent Zhang, %s" (format-time-string "%Y"))
-          dashboard-footer-icon (cond ((display-graphic-p)
+          dashboard-footer-icon (cond ((icons-displayable-p)
                                        (all-the-icons-faicon "heart"
                                                              :height 1.1
                                                              :v-adjust -0.05
@@ -112,29 +111,31 @@
 
           dashboard-set-navigator t
           dashboard-navigator-buttons
-          `(((,(when (display-graphic-p)
+          `(((,(when (icons-displayable-p)
                  (all-the-icons-octicon "mark-github" :height 1.1 :v-adjust 0.0))
               "Homepage" "Browse homepage"
               (lambda (&rest _) (browse-url centaur-homepage)))
-             (,(when (display-graphic-p)
+             (,(when (icons-displayable-p)
                  (all-the-icons-material "restore" :height 1.35 :v-adjust -0.24))
               "Restore" "Restore previous session"
               (lambda (&rest _) (restore-previous-session)))
-             (,(when (display-graphic-p)
+             (,(when (icons-displayable-p)
                  (all-the-icons-octicon "tools" :height 1.0 :v-adjust 0.0))
               "Settings" "Open custom file"
               (lambda (&rest _) (find-file custom-file)))
-             (,(when (display-graphic-p)
+             (,(when (icons-displayable-p)
                  (all-the-icons-material "update" :height 1.35 :v-adjust -0.24))
               "Update" "Update Centaur Emacs"
               (lambda (&rest _) (centaur-update)))
-             (,(if (display-graphic-p)
+             (,(if (icons-displayable-p)
                    (all-the-icons-faicon "question" :height 1.2 :v-adjust -0.1)
                  "?")
               "" "Help (?/h)"
               (lambda (&rest _) (dashboard-hydra/body))
               font-lock-string-face))))
 
+    (dashboard-setup-startup-hook)
+    :config
     (defun my-banner-path (&rest _)
       "Return the full path to banner."
       (expand-file-name "banner.txt" user-emacs-directory))

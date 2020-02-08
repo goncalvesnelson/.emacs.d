@@ -191,7 +191,7 @@ Return a list of strings as the completion candidates."
             (ruby-mode . (lambda () (require 'dap-ruby)))
             (go-mode . (lambda () (require 'dap-go)))
             (java-mode . (lambda () (require 'dap-java)))
-            ((c-mode c++-mode objc-mode swift) . (lambda () (require 'dap-lldb)))
+            ((c-mode c++-mode objc-mode swift-mode) . (lambda () (require 'dap-lldb)))
             (php-mode . (lambda () (require 'dap-php)))
             (elixir-mode . (lambda () (require 'dap-elixir)))
             ((js-mode js2-mode) . (lambda () (require 'dap-chrome)))

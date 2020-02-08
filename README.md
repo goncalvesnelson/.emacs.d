@@ -20,10 +20,12 @@
         - [Update](#update)
         - [Docker](#docker)
     - [Customization](#customization)
-        - [Customize-group](#customize-group)
+        - [Customize Group](#customize-group)
         - [Manual](#manual)
+    - [Hydra](#hydra)
     - [Screenshots](#screenshots)
     - [FAQ](#faq)
+    - [Donate](#donate)
 
 <!-- markdown-toc end -->
 
@@ -138,6 +140,8 @@ For Example:
 (setq centaur-full-name "user name")           ; User full name
 (setq centaur-mail-address "user@email.com")   ; Email address
 (setq centaur-proxy "127.0.0.1:1080")          ; Network proxy
+(setq centaur-server nil)                      ; Enable `server-mode' or not: t or nil
+(setq centaur-icon nil)                        ; Display icons or not: t or nil
 (setq centaur-package-archives 'emacs-china)   ; Package repo: melpa, melpa-mirror, emacs-china, netease or tuna
 (setq centaur-theme 'dark)                     ; Color theme: default, classic, colorful, dark, light, day or night
 (setq centaur-dashboard nil)                   ; Use dashboard at startup or not: t or nil
@@ -152,6 +156,30 @@ set manually via `M-x set-package-archives` anytime.
 
 For the personal configurations, you could put to `~/.emacs.d/custom-post.org`
  or`~/.emacs.d/custom-post.el`.
+
+## Hydra
+
+| Name                     | Scope                 | Keybinding        | Description                          |
+|--------------------------|-----------------------|-------------------|--------------------------------------|
+| `toggles-hydra`          | global                | `<f6>`            | Global option toggles                |
+| `window-hydra`           | global                | `C-c w`/`C-x o w` | Window management                    |
+| `doom-modeline-hydra`    | doom-modeline-mode    | `C-<f6>`          | Mode-line options and actions        |
+| `hydra-ivy`              | minibuffer, ivy-mode  | `C-o`             | Additional key bindings for Ivy      |
+| `ivy-hydra-read-action`  | minibuffer, ivy-mode  | `M-o`             | Actions for`ivy-dispatching-done`    |
+| `hydra-dired-qick-sort`  | dired                 | `S`               | Options for `dired-quick-sort`       |
+| `org-hydra`              | org-mode              | `<`               | Org template                         |
+| `dashboard-hydra`        | dashboard-mode        | `h`/`?`           | Actions for the dashboard            |
+| `dumb-jump-hydra`        | global                | `C-M-j`           | Jump to definition                   |
+| `youdao-dictionay-hydra` | youdao-dictionay-mode | `h`/`?`           | Actions for `youdao-dictionary`      |
+| `ztreediff-hydra`        | zreediff-mode         | `C-<f5>`          | Actions for text mode directory tree |
+| `git-messenger-hydra`    | global                | `C-x v p`         | Actions for `git-messenger`          |
+| `smerge-mode-hydra`      | smerge-mode           | `C-c m`           | Actions for `smerge-mode`            |
+| `rect-hydra`             | text-mode, prog-mode  | `C-<return>`      | Actions for Rectangle                |
+| `rect-hydra`             | org-mode              | `S-<return>`      | Actions for Rectangle                |
+| `lsp-ui-hydra`           | lsp-ui-mode           | `M-<f6>`          | Actions for `lsp-ui`                 |
+| `dap-hydra`              | dap-mode              | `M-<f5>`          | Actions for `dap-debug`              |
+| `elfeed-hydra`           | elfeed                | `?`               | Actions for RSS reader `elfeed`      |
+| `xwidget-hydra`          | xwidget-webkit-mode   | `?`               | Actions for embedded webkit browser  |
 
 ## Screenshots
 
@@ -193,13 +221,16 @@ For the personal configurations, you could put to `~/.emacs.d/custom-post.org`
     conflict with `all-the-icons`. The workaround is
     [here](https://github.com/seagle0128/doom-modeline/issues/278#issuecomment-569510336).
 
+    For better experience, I don't recommend to use GUI with `emacsclient` in
+    `daemon` mode. See [#154](https://github.com/seagle0128/.emacs.d/issues/154).
+
 1. The packages cannot be installed, what should I do?
 
    Generally it's due to connection issue. Please refer to
    [#98](https://github.com/seagle0128/.emacs.d/issues/98).
    - `M-x package-refresh-contents` and try again.
    - `(setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3")`.
-   - Use other mirror of elpa.
+   - Use other mirror of ELPA.
    - Change another network to retry.
 
 1. How to search Chinese via pinyin?
