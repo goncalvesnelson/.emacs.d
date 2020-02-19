@@ -35,11 +35,16 @@
 
 (use-package flycheck
   :diminish
-  :hook (after-init . global-flycheck-mode)
+  ;; FIXME: Fix args-out-of-range error
+  ;; @see https://github.com/flycheck/flycheck/issues/1677
+  ;; :hook (after-init . global-flycheck-mode)
+  :hook ((prog-mode markdown-mode) . (lambda ()
+                                       (unless (string-prefix-p "timemachine:" (buffer-name))
+                                         (flycheck-mode 1))))
   :config
   (setq flycheck-global-modes
-        '(not org-mode text-mode outline-mode fundamental-mode
-              shell-mode eshell-mode term-mode vterm-mode)
+        '(not text-mode outline-mode fundamental-mode org-mode
+              diff-mode shell-mode eshell-mode term-mode vterm-mode)
         flycheck-emacs-lisp-load-path 'inherit
         ;; Only check while saving and opening files
         flycheck-check-syntax-automatically '(save mode-enabled)

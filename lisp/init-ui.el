@@ -68,35 +68,37 @@
 ;; Theme
 (if (centaur-compatible-theme-p centaur-theme)
     (progn
+      ;; Make certain buffers grossly incandescent
+      ;; Must before loading the theme
+      (use-package solaire-mode
+        :functions persp-load-state-from-file
+        :hook (((change-major-mode after-revert ediff-prepare-buffer) . turn-on-solaire-mode)
+               (minibuffer-setup . solaire-mode-in-minibuffer)
+               (after-load-theme . solaire-mode-swap-bg))
+        :init
+        (solaire-global-mode 1)
+        (advice-add #'persp-load-state-from-file
+                    :after #'solaire-mode-restore-persp-mode-buffers))
+
       (use-package doom-themes
-        :defines doom-themes-treemacs-theme
         :functions doom-themes-hide-modeline
-        :custom (doom-dark+-blue-modeline t)
+        :custom-face
+        (doom-modeline-buffer-file ((t (:inherit (mode-line bold)))))
+        :custom
+        (doom-dark+-blue-modeline t)
+        (doom-themes-treemacs-theme "doom-colors")
         :init (centaur-load-theme centaur-theme)
         :config
         ;; Enable flashing mode-line on errors
         (doom-themes-visual-bell-config)
 
         ;; Enable customized theme (`all-the-icons' must be installed!)
-        (setq doom-themes-treemacs-theme "doom-colors")
         (doom-themes-treemacs-config)
         (with-eval-after-load 'treemacs
-          (remove-hook 'treemacs-mode-hook #'doom-themes-hide-modeline)))
-
-      ;; Make certain buffers grossly incandescent
-      (use-package solaire-mode
-        :functions persp-load-state-from-file
-        :hook (((change-major-mode after-revert ediff-prepare-buffer) . turn-on-solaire-mode)
-               (minibuffer-setup . solaire-mode-in-minibuffer)
-               (after-load-theme . solaire-mode-swap-bg))
-        :config
-        (solaire-global-mode 1)
-        (solaire-mode-swap-bg)
-        (advice-add #'persp-load-state-from-file
-                    :after #'solaire-mode-restore-persp-mode-buffers)))
+          (remove-hook 'treemacs-mode-hook #'doom-themes-hide-modeline))))
   (progn
     (warn "The current theme may not be compatible with Centaur!")
-    (centaur-load-theme centaur-theme)))
+    (load-theme centaur-theme t)))
 
 ;; Mode-line
 (use-package doom-modeline
@@ -107,7 +109,7 @@
   (doom-modeline-mu4e nil)
   :hook (after-init . doom-modeline-mode)
   :init
-  ;; prevent flash of unstyled modeline at startup
+  ;; Prevent flash of unstyled modeline at startup
   (unless after-init-time
     (setq doom-modeline--old-format mode-line-format)
     (setq-default mode-line-format nil))
@@ -159,7 +161,16 @@
      ("V" (setq doom-modeline-env-version (not doom-modeline-env-version))
       "version" :toggle doom-modeline-env-version))
     "Style"
-    (("t u" (setq doom-modeline-buffer-file-name-style 'truncate-upto-project)
+    (("a" (setq doom-modeline-buffer-file-name-style 'auto)
+      "auto"
+      :toggle (eq doom-modeline-buffer-file-name-style 'auto))
+     ("b" (setq doom-modeline-buffer-file-name-style 'buffer-name)
+      "buffer name"
+      :toggle (eq doom-modeline-buffer-file-name-style 'buffer-name))
+     ("f" (setq doom-modeline-buffer-file-name-style 'file-name)
+      "file name"
+      :toggle (eq doom-modeline-buffer-file-name-style 'file-name))
+     ("t u" (setq doom-modeline-buffer-file-name-style 'truncate-upto-project)
       "truncate upto project"
       :toggle (eq doom-modeline-buffer-file-name-style 'truncate-upto-project))
      ("t f" (setq doom-modeline-buffer-file-name-style 'truncate-from-project)
@@ -182,13 +193,7 @@
       :toggle (eq doom-modeline-buffer-file-name-style 'relative-from-project))
      ("r t" (setq doom-modeline-buffer-file-name-style 'relative-to-project)
       "relative to project"
-      :toggle (eq doom-modeline-buffer-file-name-style 'relative-to-project))
-     ("f" (setq doom-modeline-buffer-file-name-style 'file-name)
-      "file name"
-      :toggle (eq doom-modeline-buffer-file-name-style 'file-name))
-     ("b" (setq doom-modeline-buffer-file-name-style 'buffer-name)
-      "buffer name"
-      :toggle (eq doom-modeline-buffer-file-name-style 'buffer-name)))
+      :toggle (eq doom-modeline-buffer-file-name-style 'relative-to-project)))
     "Project Detection"
     (("p f" (setq doom-modeline-project-detection 'ffip)
       "ffip"
@@ -216,14 +221,10 @@
               (grip-browse-preview)
             (message "Not in preview"))
       "browse preview" :exit t)
-     ("z h" (counsel-read-setq-expression 'doom-modeline-height)
-      "set height" :exit t)
-     ("z w" (counsel-read-setq-expression 'doom-modeline-bar-width)
-      "set bar width" :exit t)
-     ("z g" (counsel-read-setq-expression 'doom-modeline-github-interval)
-      "set github interval" :exit t)
-     ("z n" (counsel-read-setq-expression 'doom-modeline-gnus-timer)
-      "set gnus interval" :exit t)))))
+     ("z h" (counsel-read-setq-expression 'doom-modeline-height) "set height")
+     ("z w" (counsel-read-setq-expression 'doom-modeline-bar-width) "set bar width")
+     ("z g" (counsel-read-setq-expression 'doom-modeline-github-interval) "set github interval")
+     ("z n" (counsel-read-setq-expression 'doom-modeline-gnus-timer) "set gnus interval")))))
 
 (use-package hide-mode-line
   :hook (((completion-list-mode completion-in-region-mode) . hide-mode-line-mode)))
@@ -240,38 +241,37 @@
   :init (unless (or sys/win32p (font-installed-p "all-the-icons"))
           (all-the-icons-install-fonts t))
   :config
-  (with-no-warnings
-    ;; FIXME: Align the directory icons
-    ;; @see https://github.com/domtronn/all-the-icons.el/pull/173
-    (defun all-the-icons-icon-for-dir (dir &optional chevron padding)
-      "Format an icon for DIR with CHEVRON similar to tree based directories."
-      (let* ((matcher (all-the-icons-match-to-alist (file-name-base (directory-file-name dir)) all-the-icons-dir-icon-alist))
-             (path (expand-file-name dir))
-             (chevron (if chevron (all-the-icons-octicon (format "chevron-%s" chevron) :height 0.8 :v-adjust -0.1) ""))
-             (padding (or padding "\t"))
-             (icon (cond
-                    ((file-symlink-p path)
-                     (all-the-icons-octicon "file-symlink-directory" :height 1.0 :v-adjust 0.0))
-                    ((all-the-icons-dir-is-submodule path)
-                     (all-the-icons-octicon "file-submodule" :height 1.0 :v-adjust 0.0))
-                    ((file-exists-p (format "%s/.git" path))
-                     (format "%s" (all-the-icons-octicon "repo" :height 1.1 :v-adjust 0.0)))
-                    (t (apply (car matcher) (list (cadr matcher) :v-adjust 0.0))))))
-        (format "%s%s%s%s%s" padding chevron padding icon padding)))
+  ;; FIXME: Align the directory icons
+  ;; @see https://github.com/domtronn/all-the-icons.el/pull/173
+  (defun all-the-icons-icon-for-dir (dir &optional chevron padding)
+    "Format an icon for DIR with CHEVRON similar to tree based directories."
+    (let* ((matcher (all-the-icons-match-to-alist (file-name-base (directory-file-name dir)) all-the-icons-dir-icon-alist))
+           (path (expand-file-name dir))
+           (chevron (if chevron (all-the-icons-octicon (format "chevron-%s" chevron) :height 0.8 :v-adjust -0.1) ""))
+           (padding (or padding "\t"))
+           (icon (cond
+                  ((file-symlink-p path)
+                   (all-the-icons-octicon "file-symlink-directory" :height 1.0 :v-adjust 0.0))
+                  ((all-the-icons-dir-is-submodule path)
+                   (all-the-icons-octicon "file-submodule" :height 1.0 :v-adjust 0.0))
+                  ((file-exists-p (format "%s/.git" path))
+                   (format "%s" (all-the-icons-octicon "repo" :height 1.1 :v-adjust 0.0)))
+                  (t (apply (car matcher) (list (cadr matcher) :v-adjust 0.0))))))
+      (format "%s%s%s%s%s" padding chevron padding icon padding)))
 
-    (defun all-the-icons-reset ()
-      "Reset (unmemoize/memoize) the icons."
-      (interactive)
-      (dolist (f '(all-the-icons-icon-for-file
-                   all-the-icons-icon-for-mode
-                   all-the-icons-icon-for-url
-                   all-the-icons-icon-family-for-file
-                   all-the-icons-icon-family-for-mode
-                   all-the-icons-icon-family))
-        (ignore-errors
-          (memoize-restore f)
-          (memoize f)))
-      (message "Reset all-the-icons")))
+  (defun all-the-icons-reset ()
+    "Reset (unmemoize/memoize) the icons."
+    (interactive)
+    (dolist (f '(all-the-icons-icon-for-file
+                 all-the-icons-icon-for-mode
+                 all-the-icons-icon-for-url
+                 all-the-icons-icon-family-for-file
+                 all-the-icons-icon-family-for-mode
+                 all-the-icons-icon-family))
+      (ignore-errors
+        (memoize-restore f)
+        (memoize f)))
+    (message "Reset all-the-icons"))
 
   (add-to-list 'all-the-icons-icon-alist
                '("\\.go$" all-the-icons-fileicon "go" :face all-the-icons-blue))
@@ -295,6 +295,8 @@
                '(diff-mode all-the-icons-octicon "git-compare" :v-adjust 0.0 :face all-the-icons-lred))
   (add-to-list 'all-the-icons-mode-icon-alist
                '(flycheck-error-list-mode all-the-icons-octicon "checklist" :height 1.1 :v-adjust 0.0 :face all-the-icons-lred))
+  (add-to-list 'all-the-icons-icon-alist
+               '("\\.rss$" all-the-icons-octicon "rss" :height 1.1 :v-adjust 0.0 :face all-the-icons-lorange))
   (add-to-list 'all-the-icons-mode-icon-alist
                '(elfeed-search-mode all-the-icons-faicon "rss-square" :v-adjust -0.1 :face all-the-icons-orange))
   (add-to-list 'all-the-icons-mode-icon-alist

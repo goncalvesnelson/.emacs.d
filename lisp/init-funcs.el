@@ -255,6 +255,13 @@ Same as `replace-string C-q C-m RET RET'."
        (mapcar (lambda (d) (* 1e3 d)) durations) "ms"))
     (message "%s" durations)))
 
+;; WORKAROUND: fix blank screen issue on macOS.
+(defun fix-fullscreen-cocoa ()
+  "Address blank screen issue with child-frame in fullscreen."
+  (and sys/mac-cocoa-p
+       emacs/>=26p
+       (setq ns-use-native-fullscreen nil)))
+
 
 
 ;; Update
@@ -368,7 +375,7 @@ If SYNC is non-nil, the updating process is synchronous."
 
 (defun centaur--real-theme (theme)
   "Return real THEME name."
-  (alist-get theme centaur-theme-alist 'doom-one))
+  (or (alist-get theme centaur-theme-alist) theme))
 
 (defun centaur-compatible-theme-p (theme)
   "Check if the THEME is compatible. THEME is a symbol."
@@ -420,13 +427,14 @@ If SYNC is non-nil, the updating process is synchronous."
       (proxy-http-disable)
     (proxy-http-enable)))
 
-(defun proxy-socks-show ()
-  "Show SOCKS proxy."
-  (interactive)
-  (if socks-noproxy
-      (message "Current SOCKS%d proxy is %s:%d"
-               (cadddr socks-server) (cadr socks-server) (caddr socks-server))
-    (message "No SOCKS proxy")))
+(when emacs/>=25.2p
+  (defun proxy-socks-show ()
+    "Show SOCKS proxy."
+    (interactive)
+    (if socks-noproxy
+        (message "Current SOCKS%d proxy is %s:%d"
+                 (cadddr socks-server) (cadr socks-server) (caddr socks-server))
+      (message "No SOCKS proxy"))))
 
 (defun proxy-socks-enable ()
   "Enable SOCKS proxy."

@@ -34,38 +34,30 @@
   (require 'init-const)
   (require 'init-custom))
 
-;; Compatibility
-(unless (fboundp 'caadr)
-  (defun caadr (x)
-    "Return the `car' of the `car' of the `cdr' of X."
-    (declare (compiler-macro internal--compiler-macro-cXXr))
-    (car (car (cdr x)))))
-
 ;; Personal information
 (setq user-full-name centaur-full-name
       user-mail-address centaur-mail-address)
 
 ;; Key Modifiers
-(with-no-warnings
-  (cond
-   (sys/win32p
-    ;; make PC keyboard's Win key or other to type Super or Hyper
-    ;; (setq w32-pass-lwindow-to-system nil)
-    (setq w32-lwindow-modifier 'super     ; Left Windows key
-          w32-apps-modifier 'hyper)       ; Menu/App key
-    (w32-register-hot-key [s-t]))
-   ((and sys/macp (eq window-system 'mac))
-    ;; Compatible with Emacs Mac port
-    (setq mac-option-modifier 'meta
-          mac-command-modifier 'super)
-    (bind-keys ([(super a)] . mark-whole-buffer)
-               ([(super c)] . kill-ring-save)
-               ([(super l)] . goto-line)
-               ([(super q)] . save-buffers-kill-emacs)
-               ([(super s)] . save-buffer)
-               ([(super v)] . yank)
-               ([(super w)] . delete-frame)
-               ([(super z)] . undo)))))
+(cond
+ (sys/win32p
+  ;; make PC keyboard's Win key or other to type Super or Hyper
+  ;; (setq w32-pass-lwindow-to-system nil)
+  (setq w32-lwindow-modifier 'super     ; Left Windows key
+        w32-apps-modifier 'hyper)       ; Menu/App key
+  (w32-register-hot-key [s-t]))
+ ((and sys/macp (eq window-system 'mac))
+  ;; Compatible with Emacs Mac port
+  (setq mac-option-modifier 'meta
+        mac-command-modifier 'super)
+  (bind-keys ([(super a)] . mark-whole-buffer)
+             ([(super c)] . kill-ring-save)
+             ([(super l)] . goto-line)
+             ([(super q)] . save-buffers-kill-emacs)
+             ([(super s)] . save-buffer)
+             ([(super v)] . yank)
+             ([(super w)] . delete-frame)
+             ([(super z)] . undo))))
 
 ;; Encoding
 ;; UTF-8 as the default coding system
@@ -75,6 +67,7 @@
 ;; Explicitly set the prefered coding systems to avoid annoying prompt
 ;; from emacs (especially on Microsoft Windows)
 (prefer-coding-system 'utf-8)
+(setq locale-coding-system 'utf-8)
 
 (set-language-environment 'utf-8)
 (set-default-coding-systems 'utf-8)
@@ -85,9 +78,6 @@
 (set-terminal-coding-system 'utf-8)
 (set-selection-coding-system 'utf-8)
 (modify-coding-system-alist 'process "*" 'utf-8)
-
-(setq locale-coding-system 'utf-8
-      default-process-coding-system '(utf-8 . utf-8))
 
 ;; Environment
 (when (or sys/mac-x-p sys/linux-x-p)
@@ -190,10 +180,7 @@
 
 ;; Fullscreen
 (when (display-graphic-p)
-  ;; WORKAROUND: To address blank screen issue with child-frame in fullscreen
-  (when (and sys/mac-cocoa-p emacs/>=26p)
-    (add-hook 'window-setup-hook (lambda () (setq ns-use-native-fullscreen nil))))
-
+  (add-hook 'window-setup-hook #'fix-fullscreen-cocoa)
   (bind-keys ("C-<f11>" . toggle-frame-fullscreen)
              ("C-s-f" . toggle-frame-fullscreen) ; Compatible with macOS
              ("S-s-<return>" . toggle-frame-fullscreen)

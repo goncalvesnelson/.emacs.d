@@ -88,7 +88,7 @@
          ("C-c C-z v" . browse-url-of-file))
   :init
   (with-eval-after-load 'dired
-     (bind-key "C-c C-z f" #'browse-url-of-file dired-mode-map)) )
+    (bind-key "C-c C-z f" #'browse-url-of-file dired-mode-map)))
 
 (when (featurep 'xwidget-internal)
   (use-package xwidget
@@ -287,10 +287,16 @@
          (flyspell-mode . (lambda ()
                             (dolist (key '("C-;" "C-," "C-."))
                               (unbind-key key flyspell-mode-map)))))
-  :init
-  (setq flyspell-issue-message-flag nil
-        ispell-program-name "aspell"
-        ispell-extra-args '("--sug-mode=ultra" "--lang=en_US" "--run-together")))
+  :init (setq flyspell-issue-message-flag nil
+              ispell-program-name "aspell"
+              ispell-extra-args '("--sug-mode=ultra" "--lang=en_US" "--run-together"))
+  :config
+  ;; Correcting words with flyspell via Ivy
+  (use-package flyspell-correct-ivy
+    :after ivy
+    :bind (:map flyspell-mode-map
+           ([remap flyspell-correct-word-before-point] . flyspell-correct-wrapper))
+    :init (setq flyspell-correct-interface #'flyspell-correct-ivy)))
 
 ;; Hungry deletion
 (use-package hungry-delete
@@ -319,15 +325,21 @@
          ([M-down] . pager-row-down)
          ([M-kp-2] . pager-row-down)))
 
-;; Undo/Redo
-(use-package undo-fu
-  :bind (([remap undo] . undo-fu-only-undo)
-         ([remap undo-only] . undo-fu-only-undo)
-         ("C-?" . undo-fu-only-redo)
-         ("M-_" . undo-fu-only-redo)))
+;; Treat undo history as a tree
+(use-package undo-tree
+  :diminish
+  :hook (after-init . global-undo-tree-mode)
+  :init
+  (setq undo-tree-visualizer-timestamps t
+        undo-tree-enable-undo-in-region nil
+        undo-tree-auto-save-history nil)
+
+  ;; HACK: keep the diff window
+  (make-variable-buffer-local 'undo-tree-visualizer-diff)
+  (setq-default undo-tree-visualizer-diff t))
 
 ;; Goto last change
-(use-package goto-last-change
+(use-package goto-chg
   :bind ("C-," . goto-last-change))
 
 ;; Record and jump to the last point in the buffer

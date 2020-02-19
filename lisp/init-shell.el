@@ -40,32 +40,31 @@
   :init
   (setq system-uses-terminfo nil)
 
-  (with-no-warnings
-    (defun my-shell-simple-send (proc command)
-      "Various PROC COMMANDs pre-processing before sending to shell."
-      (cond
-       ;; Checking for clear command and execute it.
-       ((string-match "^[ \t]*clear[ \t]*$" command)
-        (comint-send-string proc "\n")
-        (erase-buffer))
-       ;; Checking for man command and execute it.
-       ((string-match "^[ \t]*man[ \t]*" command)
-        (comint-send-string proc "\n")
-        (setq command (replace-regexp-in-string "^[ \t]*man[ \t]*" "" command))
-        (setq command (replace-regexp-in-string "[ \t]+$" "" command))
-        ;;(message (format "command %s command" command))
-        (funcall 'man command))
-       ;; Send other commands to the default handler.
-       (t (comint-simple-send proc command))))
+  (defun my-shell-simple-send (proc command)
+    "Various PROC COMMANDs pre-processing before sending to shell."
+    (cond
+     ;; Checking for clear command and execute it.
+     ((string-match "^[ \t]*clear[ \t]*$" command)
+      (comint-send-string proc "\n")
+      (erase-buffer))
+     ;; Checking for man command and execute it.
+     ((string-match "^[ \t]*man[ \t]*" command)
+      (comint-send-string proc "\n")
+      (setq command (replace-regexp-in-string "^[ \t]*man[ \t]*" "" command))
+      (setq command (replace-regexp-in-string "[ \t]+$" "" command))
+      ;;(message (format "command %s command" command))
+      (funcall 'man command))
+     ;; Send other commands to the default handler.
+     (t (comint-simple-send proc command))))
 
-    (defun my-shell-mode-hook ()
-      "Shell mode customizations."
-      (local-set-key '[up] 'comint-previous-input)
-      (local-set-key '[down] 'comint-next-input)
-      (local-set-key '[(shift tab)] 'comint-next-matching-input-from-input)
+  (defun my-shell-mode-hook ()
+    "Shell mode customizations."
+    (local-set-key '[up] 'comint-previous-input)
+    (local-set-key '[down] 'comint-next-input)
+    (local-set-key '[(shift tab)] 'comint-next-matching-input-from-input)
 
-      (ansi-color-for-comint-mode-on)
-      (setq comint-input-sender 'my-shell-simple-send))))
+    (ansi-color-for-comint-mode-on)
+    (setq comint-input-sender 'my-shell-simple-send)))
 
 ;; ANSI & XTERM 256 color support
 (use-package xterm-color
@@ -74,18 +73,18 @@
             eshell-output-filter-functions)
   :functions (compilation-filter my-advice-compilation-filter)
   :init
-  ;; For shell
+  ;; For shell and interpreters
   (setenv "TERM" "xterm-256color")
   (setq comint-output-filter-functions
         (remove 'ansi-color-process-output comint-output-filter-functions))
+  (add-hook 'comint-preoutput-filter-functions 'xterm-color-filter)
   (add-hook 'shell-mode-hook
             (lambda ()
-              ;; Disable font-locking in this buffer to improve performance
+              ;; Disable font-locking to improve performance
               (font-lock-mode -1)
-              ;; Prevent font-locking from being re-enabled in this buffer
+              ;; Prevent font-locking from being re-enabled
               (make-local-variable 'font-lock-function)
-              (setq font-lock-function (lambda (_) nil))
-              (add-hook 'comint-preoutput-filter-functions 'xterm-color-filter nil t)))
+              (setq font-lock-function #'ignore)))
 
   ;; For eshell
   (with-eval-after-load 'esh-mode
@@ -104,13 +103,7 @@
                  string
                (xterm-color-filter string))))
   (advice-add 'compilation-filter :around #'my-advice-compilation-filter)
-  (advice-add 'gud-filter :around #'my-advice-compilation-filter)
-
-  ;; For prolog inferior
-  (with-eval-after-load 'prolog
-    (add-hook 'prolog-inferior-mode-hook
-              (lambda ()
-                (add-hook 'comint-preoutput-filter-functions 'xterm-color-filter nil t)))))
+  (advice-add 'gud-filter :around #'my-advice-compilation-filter))
 
 ;; Better term
 ;; @see https://github.com/akermu/emacs-libvterm#installation
