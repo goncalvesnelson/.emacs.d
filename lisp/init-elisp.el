@@ -30,9 +30,6 @@
 
 ;;; Code:
 
-(eval-when-compile
-  (require 'init-custom))
-
 ;; Emacs lisp mode
 (use-package elisp-mode
   :ensure nil
@@ -40,10 +37,10 @@
   :functions (helpful-update
               my-lisp-indent-function
               function-advices
+              end-of-sexp
               add-button-to-remove-advice
               describe-function-1@advice-remove-button
-              end-of-sexp
-              helpful-callable@advice-remove-button)
+              helpful-update@advice-remove-button)
   :bind (:map emacs-lisp-mode-map
          ("C-c C-x" . ielm)
          ("C-c C-c" . eval-defun)
@@ -146,12 +143,11 @@ Lisp function does not specify a special indentation."
 
   (defun function-advices (function)
     "Return FUNCTION's advices."
-    (let ((function-def (advice--symbol-function function))
-          (ad-functions '()))
-      (while (advice--p function-def)
-        (setq ad-functions (append `(,(advice--car function-def)) ad-functions))
-        (setq function-def (advice--cdr function-def)))
-      ad-functions))
+    (let ((flist (indirect-function function)) advices)
+      (while (advice--p flist)
+        (setq advices `(,@advices ,(advice--car flist)))
+        (setq flist (advice--cdr flist)))
+      advices))
 
   (defun add-button-to-remove-advice (buffer-name function)
     "Add a button to remove advice."
@@ -159,12 +155,14 @@ Lisp function does not specify a special indentation."
       (with-current-buffer buffer-name
         (save-excursion
           (goto-char (point-min))
-          (let ((ad-index 0)
-                (ad-list (reverse (function-advices function))))
+          (let ((ad-list (reverse (function-advices function))))
             (while (re-search-forward "^\\(?:This function has \\)?:[-a-z]+ advice: \\(.+\\)\\.?$" nil t)
-              (let* ((name (string-trim (match-string 1) "'" "'"))
-                     (advice (or (intern-soft name) (nth ad-index ad-list))))
-                (when (and advice (functionp advice))
+              (let* ((name (string-trim (match-string 1) "[‘'`]" "[’']"))
+                     (symbol (intern-soft name))
+                     (advice (or symbol (car ad-list))))
+                (when advice
+                  (when symbol
+                    (cl-assert (eq symbol (car ad-list))))
                   (let ((inhibit-read-only t))
                     (insert "\t")
                     (insert-text-button
@@ -181,7 +179,7 @@ Lisp function does not specify a special indentation."
                               (helpful-update)
                             (revert-buffer nil t))))
                      'follow-link t))))
-              (setq ad-index (1+ ad-index))))))))
+              (setq ad-list (car ad-list))))))))
 
   (define-advice describe-function-1 (:after (function) advice-remove-button)
     (add-button-to-remove-advice "*Help*" function))
@@ -269,18 +267,21 @@ Lisp function does not specify a special indentation."
          (helpful-variable (button-get button 'apropos-symbol))))))
 
   ;; Add remove buttons for advices
-  (define-advice helpful-callable (:after (function) advice-remove-button)
-    (add-button-to-remove-advice (helpful--buffer function t) function))
+  (define-advice helpful-update (:after () advice-remove-button)
+    (when helpful--callable-p
+      (add-button-to-remove-advice (helpful--buffer helpful--sym t) helpful--sym)))
   :config
-  (defun my-helpful--navigate (button)
-    "Navigate to the path this BUTTON represents."
-    (find-file-other-window (substring-no-properties (button-get button 'path)))
-    ;; We use `get-text-property' to work around an Emacs 25 bug:
-    ;; http://git.savannah.gnu.org/cgit/emacs.git/commit/?id=f7c4bad17d83297ee9a1b57552b1944020f23aea
-    (-when-let (pos (get-text-property button 'position
-                                       (marker-buffer button)))
-      (helpful--goto-char-widen pos)))
-  (advice-add #'helpful--navigate :override #'my-helpful--navigate))
+  (with-no-warnings
+    ;; Open the buffer in other window
+    (defun my-helpful--navigate (button)
+      "Navigate to the path this BUTTON represents."
+      (find-file-other-window (substring-no-properties (button-get button 'path)))
+      ;; We use `get-text-property' to work around an Emacs 25 bug:
+      ;; http://git.savannah.gnu.org/cgit/emacs.git/commit/?id=f7c4bad17d83297ee9a1b57552b1944020f23aea
+      (-when-let (pos (get-text-property button 'position
+                                         (marker-buffer button)))
+        (helpful--goto-char-widen pos)))
+    (advice-add #'helpful--navigate :override #'my-helpful--navigate)))
 
 ;; For ERT
 (use-package overseer

@@ -30,8 +30,7 @@
 
 ;;; Code:
 
-(eval-when-compile
-  (require 'init-const))
+(require 'init-const)
 
 (use-package org
   :ensure nil
@@ -103,28 +102,7 @@ prepended to the element after the #+HEADER: tag."
                     (self-insert-command 1)))))
   :hook ((org-mode . (lambda ()
                        "Beautify org symbols."
-                       (push '("[ ]" . ?☐) prettify-symbols-alist)
-                       (push '("[X]" . ?☑) prettify-symbols-alist)
-                       (push '("[-]" . ?⛝) prettify-symbols-alist)
-
-                       (push '("#+ARCHIVE:" . ?📦) prettify-symbols-alist)
-                       (push '("#+AUTHOR:" . ?👤) prettify-symbols-alist)
-                       (push '("#+CREATOR:" . ?💁) prettify-symbols-alist)
-                       (push '("#+DATE:" . ?📆) prettify-symbols-alist)
-                       (push '("#+DESCRIPTION:" . ?⸙) prettify-symbols-alist)
-                       (push '("#+EMAIL:" . ?🖂) prettify-symbols-alist)
-                       (push '("#+OPTIONS:" . ?⛭) prettify-symbols-alist)
-                       (push '("#+SETUPFILE:" . ?⛮) prettify-symbols-alist)
-                       (push '("#+TAGS:" . ?🏷) prettify-symbols-alist)
-                       (push '("#+TITLE:" . ?🕮) prettify-symbols-alist)
-
-                       (push '("#+BEGIN_SRC" . ?✎) prettify-symbols-alist)
-                       (push '("#+END_SRC" . ?□) prettify-symbols-alist)
-                       (push '("#+BEGIN_QUOTE" . ?») prettify-symbols-alist)
-                       (push '("#+END_QUOTE" . ?«) prettify-symbols-alist)
-                       (push '("#+HEADERS" . ?☰) prettify-symbols-alist)
-                       (push '("#+RESULTS:" . ?💻) prettify-symbols-alist)
-
+                       (setq prettify-symbols-alist centaur-prettify-org-symbols-alist)
                        (prettify-symbols-mode 1)))
          (org-indent-mode . (lambda()
                               (diminish 'org-indent-mode)
@@ -132,23 +110,25 @@ prepended to the element after the #+HEADER: tag."
                               ;; @see https://github.com/seagle0128/.emacs.d/issues/88
                               (make-variable-buffer-local 'show-paren-mode)
                               (setq show-paren-mode nil))))
-  :init (setq org-agenda-files '("~/org")
-              org-todo-keywords
-              '((sequence "TODO(t)" "DOING(i)" "HANGUP(h)" "|" "DONE(d)" "CANCEL(c)")
-                (sequence "⚑(T)" "🏴(I)" "❓(H)" "|" "✔(D)" "✘(C)"))
-              org-todo-keyword-faces '(("HANGUP" . warning)
-                                       ("❓" . warning))
-              org-priority-faces '((?A . error)
-                                   (?B . warning)
-                                   (?C . success))
-              org-tags-column -80
-              org-log-done 'time
-              org-catch-invisible-edits 'smart
-              org-startup-indented t
-              org-ellipsis (if (char-displayable-p ?) "  " nil)
-              org-pretty-entities nil
-              org-hide-emphasis-markers t)
   :config
+  ;; To speed up startup, don't put to init section
+  (setq org-agenda-files '("~/org")
+        org-todo-keywords
+        '((sequence "TODO(t)" "DOING(i)" "HANGUP(h)" "|" "DONE(d)" "CANCEL(c)")
+          (sequence "⚑(T)" "🏴(I)" "❓(H)" "|" "✔(D)" "✘(C)"))
+        org-todo-keyword-faces '(("HANGUP" . warning)
+                                 ("❓" . warning))
+        org-priority-faces '((?A . error)
+                             (?B . warning)
+                             (?C . success))
+        org-tags-column -80
+        org-log-done 'time
+        org-catch-invisible-edits 'smart
+        org-startup-indented t
+        org-ellipsis (if (char-displayable-p ?) "  " nil)
+        org-pretty-entities nil
+        org-hide-emphasis-markers t)
+
   ;; Add new template
   (add-to-list 'org-structure-template-alist '("n" . "note"))
 
@@ -216,6 +196,9 @@ prepended to the element after the #+HEADER: tag."
     :if (executable-find "jupyter")     ; DO NOT remove
     :init (cl-pushnew '(ipython . t) load-language-list))
 
+  (use-package ob-mermaid
+    :init (cl-pushnew '(mermaid . t) load-language-list))
+
   (org-babel-do-load-languages 'org-babel-load-languages
                                load-language-list)
 
@@ -271,6 +254,17 @@ prepended to the element after the #+HEADER: tag."
     (org-pomodoro-mode-line-break ((t (:inherit success))))
     :bind (:map org-agenda-mode-map
            ("P" . org-pomodoro))))
+
+;; org-roam
+(when emacs/>=26p
+  (use-package org-roam
+    :hook (after-init . org-roam-mode)
+    :bind (:map org-roam-mode-map
+           (("C-c n l" . org-roam)
+            ("C-c n f" . org-roam-find-file)
+            ("C-c n g" . org-roam-graph-show))
+           :map org-mode-map
+           (("C-c n i" . org-roam-insert)))))
 
 (provide 'init-org)
 

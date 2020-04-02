@@ -30,14 +30,9 @@
 
 ;;; Code:
 
-(eval-when-compile
-  (require 'init-const)
-  (require 'init-custom))
-
-;; Suppress warnings in hydra
-(declare-function centaur-compatible-theme-p 'init-funcs)
-(declare-function centaur-load-theme 'init-funcs)
-(declare-function font-installed-p 'init-funcs)
+(require 'init-const)
+(require 'init-custom)
+(require 'init-funcs)
 
 ;; Logo
 (setq fancy-splash-image centaur-logo)
@@ -81,24 +76,21 @@
                     :after #'solaire-mode-restore-persp-mode-buffers))
 
       (use-package doom-themes
-        :functions doom-themes-hide-modeline
         :custom-face
         (doom-modeline-buffer-file ((t (:inherit (mode-line bold)))))
         :custom
         (doom-dark+-blue-modeline t)
         (doom-themes-treemacs-theme "doom-colors")
-        :init (centaur-load-theme centaur-theme)
+        :init (centaur-load-theme centaur-theme t)
         :config
         ;; Enable flashing mode-line on errors
         (doom-themes-visual-bell-config)
 
-        ;; Enable customized theme (`all-the-icons' must be installed!)
-        (doom-themes-treemacs-config)
-        (with-eval-after-load 'treemacs
-          (remove-hook 'treemacs-mode-hook #'doom-themes-hide-modeline))))
+        ;; Enable customized theme
+        (doom-themes-treemacs-config)))
   (progn
-    (warn "The current theme may not be compatible with Centaur!")
-    (load-theme centaur-theme t)))
+    (warn "The current theme may not be compatible!")
+    (centaur-load-theme centaur-theme t)))
 
 ;; Mode-line
 (use-package doom-modeline
@@ -111,7 +103,7 @@
   :init
   ;; Prevent flash of unstyled modeline at startup
   (unless after-init-time
-    (setq doom-modeline--old-format mode-line-format)
+    (setq doom-modeline--default-format mode-line-format)
     (setq-default mode-line-format nil))
   :bind (:map doom-modeline-mode-map
          ("C-<f6>" . doom-modeline-hydra/body))
@@ -156,7 +148,9 @@
       "irc" :toggle doom-modeline-irc)
      ("F" (setq doom-modeline-irc-buffers (not doom-modeline-irc-buffers))
       "irc buffers" :toggle doom-modeline-irc-buffers)
-     ("S" (setq doom-modeline-checker-simple-format (not doom-modeline-checker-simple-format))
+     ("S" (progn
+            (setq doom-modeline-checker-simple-format (not doom-modeline-checker-simple-format))
+            (and (bound-and-true-p flycheck-mode) (flycheck-buffer)))
       "simple checker" :toggle doom-modeline-checker-simple-format)
      ("V" (setq doom-modeline-env-version (not doom-modeline-env-version))
       "version" :toggle doom-modeline-env-version))
@@ -227,7 +221,9 @@
      ("z n" (counsel-read-setq-expression 'doom-modeline-gnus-timer) "set gnus interval")))))
 
 (use-package hide-mode-line
-  :hook (((completion-list-mode completion-in-region-mode) . hide-mode-line-mode)))
+  :hook (((completion-list-mode
+           completion-in-region-mode
+           flycheck-error-list-mode) . hide-mode-line-mode)))
 
 ;; A minor-mode menu for mode-line
 (when emacs/>=25.2p
@@ -241,40 +237,28 @@
   :init (unless (or sys/win32p (font-installed-p "all-the-icons"))
           (all-the-icons-install-fonts t))
   :config
-  ;; FIXME: Align the directory icons
-  ;; @see https://github.com/domtronn/all-the-icons.el/pull/173
-  (defun all-the-icons-icon-for-dir (dir &optional chevron padding)
-    "Format an icon for DIR with CHEVRON similar to tree based directories."
-    (let* ((matcher (all-the-icons-match-to-alist (file-name-base (directory-file-name dir)) all-the-icons-dir-icon-alist))
-           (path (expand-file-name dir))
-           (chevron (if chevron (all-the-icons-octicon (format "chevron-%s" chevron) :height 0.8 :v-adjust -0.1) ""))
-           (padding (or padding "\t"))
-           (icon (cond
-                  ((file-symlink-p path)
-                   (all-the-icons-octicon "file-symlink-directory" :height 1.0 :v-adjust 0.0))
-                  ((all-the-icons-dir-is-submodule path)
-                   (all-the-icons-octicon "file-submodule" :height 1.0 :v-adjust 0.0))
-                  ((file-exists-p (format "%s/.git" path))
-                   (format "%s" (all-the-icons-octicon "repo" :height 1.1 :v-adjust 0.0)))
-                  (t (apply (car matcher) (list (cadr matcher) :v-adjust 0.0))))))
-      (format "%s%s%s%s%s" padding chevron padding icon padding)))
-
+  (declare-function memoize 'memoize)
+  (declare-function memoize-restore 'memoize)
   (defun all-the-icons-reset ()
     "Reset (unmemoize/memoize) the icons."
     (interactive)
-    (dolist (f '(all-the-icons-icon-for-file
-                 all-the-icons-icon-for-mode
-                 all-the-icons-icon-for-url
-                 all-the-icons-icon-family-for-file
-                 all-the-icons-icon-family-for-mode
-                 all-the-icons-icon-family))
-      (ignore-errors
+    (ignore-errors
+      (dolist (f '(all-the-icons-icon-for-file
+                   all-the-icons-icon-for-mode
+                   all-the-icons-icon-for-url
+                   all-the-icons-icon-family-for-file
+                   all-the-icons-icon-family-for-mode
+                   all-the-icons-icon-family))
         (memoize-restore f)
         (memoize f)))
     (message "Reset all-the-icons"))
 
   (add-to-list 'all-the-icons-icon-alist
                '("\\.go$" all-the-icons-fileicon "go" :face all-the-icons-blue))
+  (add-to-list 'all-the-icons-icon-alist
+               '("\\go.mod$" all-the-icons-fileicon "go" :face all-the-icons-dblue))
+  (add-to-list 'all-the-icons-icon-alist
+               '("\\go.sum$" all-the-icons-fileicon "go" :face all-the-icons-dpurple))
   (add-to-list 'all-the-icons-mode-icon-alist
                '(go-mode all-the-icons-fileicon "go" :face all-the-icons-blue))
   (add-to-list 'all-the-icons-mode-icon-alist
@@ -386,11 +370,12 @@
 (use-package mixed-pitch
   :diminish)
 
-(when sys/macp
-  ;; Render thinner fonts
-  (setq ns-use-thin-smoothing t)
-  ;; Don't open a file in a new frame
-  (setq ns-pop-up-frames nil))
+(with-no-warnings
+  (when sys/macp
+    ;; Render thinner fonts
+    (setq ns-use-thin-smoothing t)
+    ;; Don't open a file in a new frame
+    (setq ns-pop-up-frames nil)))
 
 ;; Don't use GTK+ tooltip
 (when (boundp 'x-gtk-use-system-tooltips)
