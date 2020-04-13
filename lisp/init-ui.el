@@ -79,7 +79,6 @@
         :custom-face
         (doom-modeline-buffer-file ((t (:inherit (mode-line bold)))))
         :custom
-        (doom-dark+-blue-modeline t)
         (doom-themes-treemacs-theme "doom-colors")
         :init (centaur-load-theme centaur-theme t)
         :config
@@ -253,6 +252,8 @@
         (memoize f)))
     (message "Reset all-the-icons"))
 
+  (add-to-list 'all-the-icons-icon-alist
+               '("^Rakefile$" all-the-icons-alltheicon "ruby-alt" :face all-the-icons-red))
   (add-to-list 'all-the-icons-icon-alist
                '("\\.go$" all-the-icons-fileicon "go" :face all-the-icons-blue))
   (add-to-list 'all-the-icons-icon-alist
