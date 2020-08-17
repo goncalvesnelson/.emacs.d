@@ -220,15 +220,13 @@ Save to `custom-file' if NO-SAVE is nil."
   :group centaur
   (if centaur-read-mode
       (progn
-        (when (fboundp 'olivetti-mode)
-          (olivetti-mode 1))
-        (when (fboundp 'mixed-pitch-mode)
-          (mixed-pitch-mode 1)))
+        (and (fboundp 'olivetti-mode) (olivetti-mode 1))
+        (and (fboundp 'mixed-pitch-mode) (mixed-pitch-mode 1))
+        (text-scale-set +2))
     (progn
-      (when (fboundp 'olivetti-mode)
-        (olivetti-mode -1))
-      (when (fboundp 'mixed-pitch-mode)
-        (mixed-pitch-mode -1)))))
+      (and (fboundp 'olivetti-mode) (olivetti-mode -1))
+      (and (fboundp 'mixed-pitch-mode) (mixed-pitch-mode -1))
+      (text-scale-set 0))))
 (global-set-key (kbd "M-<f7>") #'centaur-read-mode)
 
 ;; Pakcage repository (ELPA)
@@ -302,7 +300,7 @@ Return the fastest package archive."
   "Address blank screen issue with child-frame in fullscreen."
   (and sys/mac-cocoa-p
        emacs/>=26p
-       (boundp ns-use-native-fullscreen)
+       (bound-and-true-p ns-use-native-fullscreen)
        (setq ns-use-native-fullscreen nil)))
 
 
@@ -386,7 +384,7 @@ If SYNC is non-nil, the updating process is synchronous."
 (defalias 'centaur-update #'update-config-and-packages)
 
 (defun update-all()
-  "Update dotfiles, org files, Emacs confgiurations and packages to the latest versions ."
+  "Update dotfiles, org files, Emacs confgiurations and packages to the latest versions."
   (interactive)
   (update-org)
   (update-dotfiles)
@@ -446,7 +444,7 @@ If SYNC is non-nil, the updating process is synchronous."
 (defun centaur-theme-enable-p (theme)
   "The THEME is enabled or not."
   (and (not (memq centaur-theme '(auto random)))
-       (eq (car custom-enabled-themes) (centaur--theme-name theme))))
+       (memq (centaur--theme-name theme) custom-enabled-themes)))
 
 (defun centaur--load-theme (theme)
   "Disable others and enable new one."

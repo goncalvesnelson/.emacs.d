@@ -87,8 +87,9 @@
     ;; FIXME: Refresh after creating or renaming the files/directories.
     ;; @see https://github.com/jtbm37/all-the-icons-dired/issues/34.
     (with-no-warnings
-      (advice-add 'dired-do-create-files :around #'all-the-icons-dired--refresh-advice)
-      (advice-add 'dired-create-directory :around #'all-the-icons-dired--refresh-advice))
+      (advice-add #'dired-do-create-files :around #'all-the-icons-dired--refresh-advice)
+      (advice-add #'dired-create-directory :around #'all-the-icons-dired--refresh-advice)
+      (advice-add #'wdired-abort-changes :around #'all-the-icons-dired--refresh-advice))
 
     (with-no-warnings
       (defun my-all-the-icons-dired--refresh ()
@@ -100,7 +101,7 @@
               (goto-char (point-min))
               (while (not (eobp))
                 (when (dired-move-to-filename nil)
-                  (let ((file (dired-get-filename 'relative 'noerror)))
+                  (let ((file (file-local-name (dired-get-filename 'relative 'noerror))))
                     (when file
                       (let ((icon (if (file-directory-p file)
                                       (all-the-icons-icon-for-dir file

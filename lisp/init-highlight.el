@@ -168,7 +168,7 @@ FACE defaults to inheriting from default and highlight."
 ;; Colorize color names in buffers
 (use-package rainbow-mode
   :diminish
-  :bind (:map help-mode-map
+  :bind (:map special-mode-map
          ("w" . rainbow-mode))
   :hook ((html-mode php-mode) . rainbow-mode)
   :config
@@ -247,6 +247,7 @@ FACE defaults to inheriting from default and highlight."
 
     ;; Integration with magit
     (with-eval-after-load 'magit
+      (add-hook 'magit-pre-refresh-hook #'diff-hl-magit-pre-refresh)
       (add-hook 'magit-post-refresh-hook #'diff-hl-magit-post-refresh))))
 
 ;; Highlight some operations

@@ -36,11 +36,64 @@
 (use-package which-key
   :diminish
   :bind ("C-h M-m" . which-key-show-major-mode)
-  :hook (after-init . which-key-mode))
+  :hook (after-init . which-key-mode)
+  :init (setq which-key-max-description-length 30
+              which-key-show-remaining-keys t)
+  :config
+  (which-key-add-key-based-replacements "C-c !" "flycheck")
+  (which-key-add-key-based-replacements "C-c &" "yasnippet")
+  (which-key-add-key-based-replacements "C-c c" "counsel")
+  (which-key-add-key-based-replacements "C-c n" "org-roam")
+  (which-key-add-key-based-replacements "C-c t" "hl-todo")
+  (which-key-add-key-based-replacements "C-c v" "ivy-view")
+  (which-key-add-key-based-replacements "C-c C-z" "browse")
+
+  (which-key-add-key-based-replacements "C-x RET" "coding-system")
+  (which-key-add-key-based-replacements "C-x 8" "unicode")
+  (which-key-add-key-based-replacements "C-x @" "modifior")
+  (which-key-add-key-based-replacements "C-x X" "edebug")
+  (which-key-add-key-based-replacements "C-x a" "abbrev")
+  (which-key-add-key-based-replacements "C-x n" "narrow")
+  (which-key-add-key-based-replacements "C-x t" "tab")
+  (which-key-add-key-based-replacements "C-x C-a" "edebug")
+
+
+  (which-key-add-major-mode-key-based-replacements 'emacs-lisp-mode
+    "C-c ," "overseer")
+  (which-key-add-major-mode-key-based-replacements 'python-mode
+    "C-c C-t" "python-skeleton")
+
+  (which-key-add-major-mode-key-based-replacements 'markdown-mode
+    "C-c C-a" "markdown-link")
+  (which-key-add-major-mode-key-based-replacements 'markdown-mode
+    "C-c C-c" "markdown-command")
+  (which-key-add-major-mode-key-based-replacements 'markdown-mode
+    "C-c C-s" "markdown-style")
+  (which-key-add-major-mode-key-based-replacements 'markdown-mode
+    "C-c C-t" "markdown-header")
+  (which-key-add-major-mode-key-based-replacements 'markdown-mode
+    "C-c C-x" "markdown-toggle")
+
+  (which-key-add-major-mode-key-based-replacements 'gfm-mode
+    "C-c C-a" "markdown-link")
+  (which-key-add-major-mode-key-based-replacements 'gfm-mode
+    "C-c C-c" "markdown-command")
+  (which-key-add-major-mode-key-based-replacements 'gfm-mode
+    "C-c C-s" "markdown-style")
+  (which-key-add-major-mode-key-based-replacements 'gfm-mode
+    "C-c C-t" "markdown-header")
+  (which-key-add-major-mode-key-based-replacements 'gfm-mode
+    "C-c C-x" "markdown-toggle"))
 
 ;; Persistent the scratch buffer
 (use-package persistent-scratch
   :diminish
+  :bind (:map persistent-scratch-mode-map
+         ([remap kill-buffer] . (lambda (&rest _)
+                                  (interactive)
+                                  (user-error "Scrach buffer cannot be killed")))
+         ([remap revert-buffer] . persistent-scratch-restore)
+         ([remap revert-this-buffer] . persistent-scratch-restore))
   :hook ((after-init . persistent-scratch-autosave-mode)
          (lisp-interaction-mode . persistent-scratch-mode)))
 
@@ -76,10 +129,15 @@
      ("R" . counsel-rg)
      ("F" . counsel-fzf))))
 
+;; Dictionary
+(when sys/macp
+  (use-package osx-dictionary
+    :bind (("C-c D" . osx-dictionary-search-pointer))))
+
 ;; Youdao Dictionary
 (use-package youdao-dictionary
   :commands youdao-dictionary-play-voice-of-current-word
-  :bind (("C-c y" . my-youdao-search-at-point)
+  :bind (("C-c y" . my-youdao-dictionary-search-at-point)
          ("C-c Y" . youdao-dictionary-search-at-point)
          :map youdao-dictionary-mode-map
          ("h" . youdao-dictionary-hydra/body)
@@ -88,7 +146,7 @@
   (setq url-automatic-caching t
         youdao-dictionary-use-chinese-word-segmentation t) ; 中文分词
 
-  (defun my-youdao-search-at-point ()
+  (defun my-youdao-dictionary-search-at-point ()
     "Search word at point and display result with `posframe', `pos-tip', or buffer."
     (interactive)
     (if (display-graphic-p)
@@ -138,13 +196,16 @@
 (use-package olivetti
   :diminish
   :bind ("<f7>" . olivetti-mode)
-  :hook (olivetti-mode . (lambda () (text-scale-set (if olivetti-mode +2 0))))
   :init (setq olivetti-body-width 0.618))
 
 ;; Edit text for browsers with GhostText or AtomicChrome extension
 (use-package atomic-chrome
   :hook ((emacs-startup . atomic-chrome-start-server)
-         (atomic-chrome-edit-mode . delete-other-windows))
+         (atomic-chrome-edit-mode . (lambda ()
+                                      "Enter edit mode and delete other windows."
+                                      (and (fboundp 'olivetti-mode)
+                                           (olivetti-mode 1))
+                                      (delete-other-windows))))
   :init (setq atomic-chrome-buffer-open-style 'frame)
   :config
   (if (fboundp 'gfm-mode)

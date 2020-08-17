@@ -31,6 +31,7 @@
 ;;; Code:
 
 (require 'init-const)
+(require 'init-custom)
 
 (use-package org
   :ensure nil
@@ -112,7 +113,7 @@ prepended to the element after the #+HEADER: tag."
                               (setq show-paren-mode nil))))
   :config
   ;; To speed up startup, don't put to init section
-  (setq org-agenda-files '("~/org")
+  (setq org-agenda-files `(,centaur-org-directory)
         org-todo-keywords
         '((sequence "TODO(t)" "DOING(i)" "HANGUP(h)" "|" "DONE(d)" "CANCEL(c)")
           (sequence "⚑(T)" "🏴(I)" "❓(H)" "|" "✔(D)" "✘(C)"))
@@ -125,7 +126,7 @@ prepended to the element after the #+HEADER: tag."
         org-log-done 'time
         org-catch-invisible-edits 'smart
         org-startup-indented t
-        org-ellipsis (if (char-displayable-p ?) "  " nil)
+        org-ellipsis (if (char-displayable-p ?🞃) "\t⏷" nil)
         org-pretty-entities nil
         org-hide-emphasis-markers t)
 
@@ -259,13 +260,31 @@ prepended to the element after the #+HEADER: tag."
 (when (and emacs/>=26p (executable-find "cc"))
   (use-package org-roam
     :diminish
+    :custom (org-roam-directory centaur-org-directory)
     :hook (after-init . org-roam-mode)
     :bind (:map org-roam-mode-map
            (("C-c n l" . org-roam)
             ("C-c n f" . org-roam-find-file)
             ("C-c n g" . org-roam-graph))
            :map org-mode-map
-           (("C-c n i" . org-roam-insert)))))
+           (("C-c n i" . org-roam-insert))
+           (("C-c n I" . org-roam-insert-immediate))))
+
+  (use-package org-roam-server
+    :functions xwidget-buffer xwidget-webkit-current-session
+    :hook (org-roam-server-mode . org-roam-server-browse)
+    :init
+    (defun org-roam-server-browse ()
+      (when org-roam-server-mode
+        (let ((url (format "http://%s:%d" org-roam-server-host org-roam-server-port)))
+          (if (featurep 'xwidget-internal)
+              (progn
+                (xwidget-webkit-browse-url url)
+                (let ((buf (xwidget-buffer (xwidget-webkit-current-session))))
+                  (when (buffer-live-p buf)
+                    (and (eq buf (current-buffer)) (quit-window))
+                    (pop-to-buffer buf))))
+            (browse-url url)))))))
 
 (provide 'init-org)
 

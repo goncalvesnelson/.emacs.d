@@ -1,6 +1,6 @@
 # Centaur Emacs
 
-[![Build Status](https://travis-ci.org/seagle0128/.emacs.d.svg?branch=master)](https://travis-ci.org/seagle0128/.emacs.d)
+[![Build Status](https://github.com/seagle0128/.emacs.d/workflows/CI/badge.svg?branch=master)](https://github.com/seagle0128/.emacs.d/actions)
 [![Release Tag](https://img.shields.io/github/tag/seagle0128/.emacs.d.svg?label=release)](https://github.com/seagle0128/.emacs.d/releases/latest)
 [![License](http://img.shields.io/:license-gpl3-blue.svg)](LICENSE)
 
@@ -150,13 +150,14 @@ For Example:
 (setq centaur-proxy "127.0.0.1:1080")          ; Network proxy
 (setq centaur-server nil)                      ; Enable `server-mode' or not: t or nil
 (setq centaur-icon nil)                        ; Display icons or not: t or nil
-(setq centaur-package-archives 'emacs-china)   ; Package repo: melpa, melpa-mirror, emacs-china, netease or tuna
+(setq centaur-package-archives 'emacs-china)   ; Package repo: melpa, emacs-china, netease or tuna
 (setq centaur-theme 'light)                    ; Color theme: auto, random, default, classic, colorful, dark, light, day or night
 (setq centaur-dashboard nil)                   ; Use dashboard at startup or not: t or nil
+(setq centaur-restore-frame-geometry nil)      ; Restore the frame's geometry at startup: t or nil
 (setq centaur-lsp 'eglot)                      ; Set LSP client: lsp-mode, eglot or nil
 (setq centaur-lsp-format-on-save-ignore-modes '(c-mode c++-mode)) ; Ignore format on save for some languages
 (setq centaur-chinese-calendar t)              ; Use Chinese calendar or not: t or nil
-(setq centaur-prettify-symbols-alist nil)      ; Alist of symbol prettifications
+(setq centaur-prettify-symbols-alist nil)      ; Alist of symbol prettifications. Nil to use font supports ligatures.
 (setq centaur-prettify-org-symbols-alist nil)  ; Alist of symbol prettifications for `org-mode'
 (setq centaur-benchmark-init t)                ; Enable initialization benchmark or not: t or nil
 ```
@@ -280,7 +281,7 @@ For the personal configurations, you could put to `~/.emacs.d/custom-post.org`
     to recognize and import the environment variables.
 
 1. How to use [zoom-window](https://github.com/syohex/emacs-zoom-window) in
-   `Centuar Emacs`?
+   `Centaur Emacs`?
 
    See [#169](https://github.com/seagle0128/.emacs.d/issues/169#issuecomment-590035527).
 

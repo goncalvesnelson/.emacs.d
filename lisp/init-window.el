@@ -202,6 +202,7 @@
         shackle-rules
         '((("*Help*" "*Apropos*") :select t :size 0.3 :align 'below :autoclose t)
           (compilation-mode :select t :size 0.3 :align 'below :autoclose t)
+          (comint-mode :select t :size 0.4 :align 'below :autoclose t)
           ("*Completions*" :size 0.3 :align 'below :autoclose t)
           ("*Pp Eval Output*" :size 15 :align 'below :autoclose t)
           ("*Backtrace*" :select t :size 15 :align 'below)
@@ -216,6 +217,7 @@
           (" *undo-tree*" :select t)
           ("*quickrun*" :select t :size 15 :align 'below)
           ("*tldr*" :size 0.4 :align 'below :autoclose t)
+          ("*osx-dictionary*" :size 20 :align 'below :autoclose t)
           ("*Youdao Dictionary*" :size 15 :align 'below :autoclose t)
           ("*Finder*" :select t :size 0.3 :align 'below :autoclose t)
           ("^\\*macro expansion\\**" :regexp t :size 0.4 :align 'below)
@@ -237,6 +239,7 @@
           (("*lsp-help*" "*lsp session*") :size 0.3 :align 'below :autoclose t)
           ("*DAP Templates*" :select t :size 0.4 :align 'below :autoclose t)
           (dap-server-log-mode :size 15 :align 'below :autoclose t)
+          ("*rustfmt*" :select t :size 0.3 :align 'below :autoclose t)
 
           (profiler-report-mode :select t :size 0.5 :align 'below)
           ("*ELP Profiling Restuls*" :select t :size 0.5 :align 'below)

@@ -50,6 +50,11 @@
   :group 'centaur
   :type 'string)
 
+(defcustom centaur-org-directory (expand-file-name "~/org/")
+  "Set org directory."
+  :group 'centaur
+  :type 'string)
+
 (defcustom centaur-proxy "127.0.0.1:1087"
   "Set network proxy."
   :group 'centaur
@@ -74,9 +79,6 @@
     `(,(cons 'melpa
              `(,(cons "gnu"   (concat proto "://elpa.gnu.org/packages/"))
                ,(cons "melpa" (concat proto "://melpa.org/packages/"))))
-      ,(cons 'melpa-mirror
-             `(,(cons "gnu"   (concat proto "://elpa.gnu.org/packages/"))
-               ,(cons "melpa" (concat proto "://www.mirrorservice.org/sites/melpa.org/packages/"))))
       ,(cons 'emacs-china
              `(,(cons "gnu"   (concat proto "://elpa.emacs-china.org/gnu/"))
                ,(cons "melpa" (concat proto "://elpa.emacs-china.org/melpa/"))))
@@ -160,6 +162,12 @@ If Non-nil, use dashboard, otherwise will restore previous session."
   :group 'centaur
   :type 'boolean)
 
+(defcustom centaur-restore-frame-geometry t
+  "Restore the frame's geometry at startup.
+If Non-nil, save and restore the frame's geometry."
+  :group 'centaur
+  :type 'boolean)
+
 (defcustom centaur-lsp 'lsp-mode
   "Set language server."
   :group 'centaur
@@ -170,11 +178,10 @@ If Non-nil, use dashboard, otherwise will restore previous session."
 
 (defcustom centaur-lsp-format-on-save-ignore-modes '(c-mode c++-mode)
   "The modes that don't auto format and organize imports while saving the buffers.
-
 `prog-mode' means ignoring all derived modes.
 "
   :group 'centaur
-  :type 'list)
+  :type '(repeat (symbol :tag "Major-Mode")))
 
 (defcustom centaur-chinese-calendar nil
   "Use Chinese calendar or not."
@@ -200,7 +207,8 @@ If Non-nil, use dashboard, otherwise will restore previous session."
     ("&&" . ?∧)
     ("||" . ?∨)
     ("not" . ?¬))
-  "Alist of symbol prettifications."
+  "Alist of symbol prettifications.
+Nil to use font supports ligatures."
   :group 'centaur
   :type '(alist :key-type string :value-type (choice character sexp)))
 
@@ -214,11 +222,11 @@ If Non-nil, use dashboard, otherwise will restore previous session."
     ("#+CREATOR:" . ?💁)
     ("#+DATE:" . ?📆)
     ("#+DESCRIPTION:" . ?⸙)
-    ("#+EMAIL:" . ?🖂)
+    ("#+EMAIL:" . ?📧)
     ("#+OPTIONS:" . ?⛭)
     ("#+SETUPFILE:" . ?⛮)
     ("#+TAGS:" . ?🏷)
-    ("#+TITLE:" . ?🕮)
+    ("#+TITLE:" . ?📓)
 
     ("#+BEGIN_SRC" . ?✎)
     ("#+END_SRC" . ?□)

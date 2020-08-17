@@ -10,13 +10,14 @@
 ;; (setq centaur-proxy "127.0.0.1:1080")          ; Network proxy
 ;; (setq centaur-server nil)                      ; Enable `server-mode' or not: t or nil
 ;; (setq centaur-icon nil)                        ; Display icons or not: t or nil
-;; (setq centaur-package-archives 'emacs-china)   ; Package repo: melpa, melpa-mirror, emacs-china, netease, ustc, tencent or tuna
+;; (setq centaur-package-archives 'emacs-china)   ; Package repo: melpa, emacs-china, netease, ustc, tencent or tuna
 ;; (setq centaur-theme 'light)                    ; Color theme: auto, random, default, classic, colorful, dark, light, day or night
 ;; (setq centaur-dashboard nil)                   ; Use dashboard at startup or not: t or nil
+;; (setq centaur-restore-frame-geometry nil)      ; Restore the frame's geometry at startup: t or nil
 ;; (setq centaur-lsp 'eglot)                      ; Set LSP client: lsp-mode, eglot or nil
 ;; (setq centaur-lsp-format-on-save-ignore-modes '(c-mode c++-mode)) ; Ignore format on save for some languages
 ;; (setq centaur-chinese-calendar t)              ; Use Chinese calendar or not: t or nil
-;; (setq centaur-prettify-symbols-alist nil)      ; Alist of symbol prettifications
+;; (setq centaur-prettify-symbols-alist nil)      ; Alist of symbol prettifications. Nil to use font supports ligatures.
 ;; (setq centaur-prettify-org-symbols-alist nil)  ; Alist of symbol prettifications for `org-mode'
 ;; (setq centaur-benchmark-init t)                ; Enable initialization benchmark or not: t or nil
 
@@ -38,7 +39,7 @@
                                                     (t 100))))
 
   ;; Specify font for all unicode characters
-  (cl-loop for font in '("Symbola" "Apple Symbols" "Symbol" "icons-in-terminal")
+  (cl-loop for font in '("Apple Color Emoji" "Symbola" "Symbol")
            when (font-installed-p font)
            return (set-fontset-font t 'unicode font nil 'prepend))
 

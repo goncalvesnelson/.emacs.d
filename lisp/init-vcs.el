@@ -39,6 +39,7 @@
   :bind (("C-x g" . magit-status)
          ("C-x M-g" . magit-dispatch)
          ("C-c M-g" . magit-file-popup))
+  :init (setq magit-diff-refine-hunk t)
   :config
   (when sys/win32p
     (setenv "GIT_ASKPASS" "git-gui--askpass"))
@@ -140,8 +141,8 @@
                                 :string popuped-message
                                 :left-fringe 8
                                 :right-fringe 8
-                                :internal-border-color (face-foreground 'default)
-                                :internal-border-width 1)
+                                :internal-border-width 1
+                                :internal-border-color (face-foreground 'font-lock-comment-face))
                  (unwind-protect
                      (push (read-event) unread-command-events)
                    (posframe-delete buffer-name))))
