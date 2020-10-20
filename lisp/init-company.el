@@ -61,8 +61,9 @@
         company-dabbrev-downcase nil
         company-global-modes '(not erc-mode message-mode help-mode
                                    gud-mode eshell-mode shell-mode)
-        company-frontends '(company-pseudo-tooltip-frontend
-                            company-echo-metadata-frontend))
+        company-backends '((company-capf :with company-yasnippet)
+                           (company-dabbrev-code company-keywords company-files)
+                           company-dabbrev))
 
   (defun my-company-yasnippet ()
     "Hide the current completeions and show snippets."
@@ -83,10 +84,12 @@
       (defun my-company-enbale-yas (&rest _)
         "Enable `yasnippet' in `company'."
         (setq company-backends (mapcar #'company-backend-with-yas company-backends)))
-      ;; Enable in current backends
-      (my-company-enbale-yas)
-      ;; Enable in `lsp-mode'
-      (advice-add #'lsp--auto-configure :after #'my-company-enbale-yas)
+
+      (defun my-lsp-fix-company-capf ()
+        "Remove redundant `comapny-capf'."
+        (setq company-backends
+              (remove 'company-backends (remq 'company-capf company-backends))))
+      (advice-add #'lsp-completion--enable :after #'my-lsp-fix-company-capf)
 
       (defun my-company-yasnippet-disable-inline (fun command &optional arg &rest _ignore)
         "Enable yasnippet but disable it inline."
@@ -118,15 +121,12 @@
       :hook (company-mode . company-box-mode)
       :init (setq company-box-enable-icon centaur-icon
                   company-box-backends-colors nil
-                  company-box-show-single-candidate t
-                  company-box-highlight-prefix t
-                  company-box-max-candidates 50
-                  company-box-doc-delay 0.5)
+                  company-box-doc-delay 0.3)
       :config
       (with-no-warnings
         ;; Prettify icons
         (defun my-company-box-icons--elisp (candidate)
-          (when (derived-mode-p 'emacs-lisp-mode)
+          (when (or (derived-mode-p 'emacs-lisp-mode) (derived-mode-p 'lisp-mode))
             (let ((sym (intern candidate)))
               (cond ((fboundp sym) 'Function)
                     ((featurep sym) 'Module)

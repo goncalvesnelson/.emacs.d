@@ -47,7 +47,8 @@
                lsp-rust-server)
      :commands (lsp-enable-which-key-integration
                 lsp-format-buffer
-                lsp-organize-imports)
+                lsp-organize-imports
+                lsp-install-server)
      :diminish
      :hook ((prog-mode . (lambda ()
                            (unless (or (derived-mode-p 'emacs-lisp-mode 'lisp-mode) (eq major-mode 'clojure-mode))
@@ -73,8 +74,8 @@
            lsp-signature-auto-activate nil
            lsp-modeline-code-actions-enable nil
            lsp-modeline-diagnostics-enable nil
+           lsp-modeline-workspace-status-enable nil
 
-           lsp-enable-file-watchers nil
            lsp-enable-file-watchers nil
            lsp-enable-folding nil
            lsp-enable-semantic-highlighting nil
@@ -106,7 +107,7 @@
      :custom-face
      (lsp-ui-sideline-code-action ((t (:inherit warning))))
      :pretty-hydra
-     ((:title (pretty-hydra-title "LSP UI" 'faicon "rocket")
+     ((:title (pretty-hydra-title "LSP UI" 'faicon "rocket" :face 'all-the-icons-green)
        :color amaranth :quit-key "q")
       ("Doc"
        (("d e" (progn
@@ -121,6 +122,8 @@
          "bottom" :toggle (eq lsp-ui-doc-position 'bottom))
         ("d p" (setq lsp-ui-doc-position 'at-point)
          "at point" :toggle (eq lsp-ui-doc-position 'at-point))
+        ("d h" (setq lsp-ui-doc-header (not lsp-ui-doc-header))
+         "header" :toggle lsp-ui-doc-header)
         ("d f" (setq lsp-ui-doc-alignment 'frame)
          "align frame" :toggle (eq lsp-ui-doc-alignment 'frame))
         ("d w" (setq lsp-ui-doc-alignment 'window)
@@ -161,6 +164,7 @@
      :hook (lsp-mode . lsp-ui-mode)
      :init (setq lsp-ui-sideline-show-diagnostics nil
                  lsp-ui-sideline-ignore-duplicate t
+                 lsp-ui-doc-position 'at-point
                  lsp-ui-doc-border (face-foreground 'font-lock-comment-face)
                  lsp-ui-imenu-colors `(,(face-foreground 'font-lock-keyword-face)
                                        ,(face-foreground 'font-lock-string-face)
@@ -174,8 +178,7 @@
      (add-hook 'after-load-theme-hook
                (lambda ()
                  (setq lsp-ui-doc-border (face-foreground 'font-lock-comment-face))
-                 (set-face-background 'lsp-ui-doc-background
-                                      (face-background 'tooltip)))))
+                 (set-face-background 'lsp-ui-doc-background (face-background 'tooltip)))))
 
    ;; Ivy integration
    (use-package lsp-ivy
